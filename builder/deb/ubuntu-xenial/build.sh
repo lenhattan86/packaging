@@ -15,12 +15,25 @@
 
 set -ex
 
+# 0.23.0
 GIT_TAG=$1
+# src/main/java/com/paypal/aurora/scheduler/offers
+plugin=$2
 
 mkdir -p /scratch
 cd /scratch
 
 git clone -b "$GIT_TAG" --single-branch --depth 1 https://github.com/aurora-scheduler/aurora.git /scratch
+
+# download the plugin.
+rm -rf /aurora
+mkdir -p /aurora
+git clone https://github.com/lenhattan86/aurora.git /aurora
+cd /aurora
+git checkout -b paypal-plugin origin/paypal-plugin
+mkdir -p /scratch/${plugin}
+cp -r /aurora/${plugin}/* /scratch/${plugin}/
+cd /scratch
 
 cp -R /specs/debian .
 
@@ -41,7 +54,7 @@ export DEBFULLNAME='Aurora Scheduler'
 export DEBEMAIL='dev@aurora-scheduler.github.io'
 
 dch \
-  --newversion "$GIT_TAG" \
+  --newversion "${GIT_TAG}-plugin" \
   --package aurora-scheduler \
   --urgency medium \
   "Aurora Scheduler package builder <dev@aurora-scheduer.github.io> $(date -R)"
